@@ -1,5 +1,43 @@
 ﻿#include "..\love\framework.h"
 
+// なす角の弧（180度を超えてもAからBまで正しく描画）
+void arc360(float ox, float oy, float ax, float ay, float bx, float by, float radius)
+{
+	ax -= ox;
+	ay -= oy;
+	float al = sqrtf(ax * ax + ay * ay);
+	if (al < 1e-5f) return;
+	ax /= al;
+	ay /= al;
+
+	bx -= ox;
+	by -= oy;
+	float bl = sqrtf(bx * bx + by * by);
+	if (bl < 1e-5f) return;
+	bx /= bl;
+	by /= bl;
+
+	// 1. acosfで基本のなす角（0〜180度）を計算
+	float rad = acosf(ax * bx + ay * by);
+
+	// 2. 外積を使って、BがAに対してどちら側にあるかを判定
+	float cross = ax * by - ay * bx;
+
+	// 3. 外積が負（または環境により正）の場合、180度を超えた「外側の角」にする
+	// 元のコードの回転方向に合わせるため、crossの符号で分岐します
+	if (cross > 0) {
+		rad = 2.0f * 3.14159265f - rad;
+	}
+
+	for (float r = 0; r < rad; r += (0.0174532f/2)) {
+		float cr = cosf(r);
+		float sr = sinf(r);
+		float x = ax * cr - ay * sr;
+		float y = ax * sr + ay * cr;
+		// 反時計回り
+		point(ox + x * radius, oy - y * radius);
+	}
+}
 void gmain()
 {
 #if 1
@@ -12,20 +50,10 @@ void gmain()
 	float oy = height / 2.0f;
 	float unit = width / 6.28f;
 
-	float ofstRad = 0.0f;
-	float radInc = 1.57f / 2.0f;
-
-	hideCursor();
+	int deg = 0;
 	while (!quit())
 	{
 		begin();
-
-		/*動かす---------------------------------*/
-		if (isPress(MOUSE_LBUTTON)) {
-			ox += mouseVx;
-			oy -= mouseVy;
-		}
-		unit += mouseWheel * 5;
 
 		/*描画する------------------------------*/
 		//背景
@@ -33,52 +61,35 @@ void gmain()
 		fill(40,40,40);
 		rectMode(CORNER);
 		rect(0, 0, width, height);
-		//XY軸
-		strokeWeight(1);
-		stroke(255,255,255);
-		mathAxis(ox, oy, unit);
-		//sin,cosカーブ
-		ofstRad += radInc * fixed_delta;
-		strokeWeight(10);
-		for(int deg = -180; deg<=180; deg+=3){
-			float rad = 3.1415926f / 180 * deg;
-			stroke(GREEN);
-			mathPoint(rad, cos(rad));
-			stroke(RED);
-			mathPoint(rad, sin(rad + ofstRad));
-		}
-		//sin,cosで円周に矩形
+
+		//線
+		if (isTrigger(MOUSE_LBUTTON))deg += 30;
+		deg %= 360;
+		float rad = 3.1415926f / 180 * deg;
+		float radius = 300;
+		float px = ox + cos(rad) * radius;
+		float py = oy - sin(rad) * radius;
 		strokeWeight(3);
 		stroke(YELLOW);
-		rectMode(CENTER);
-		noFill();
-		for (int deg = 0; deg < 360; deg += 30) {
-			float rad = 3.1415926f / 180 * deg;
-			float px = cos(rad + ofstRad);
-			float py = sin(rad + ofstRad);
-			mathRect(px, py, 0.1f, 0.1f,rad+ofstRad);
-		}
-
-		//矢印
-		strokeWeight(3);
-		stroke(GRAY);
-		mathArrow(0, 0, mathMouseX, mathMouseY, 0.05f,20.f);
-		mathArc(1, 0, mathMouseX, mathMouseY, 0.2f);
-		//矢印の先にテキスト
-		fontRectMode(CENTER);
-		fontSize(20);
-		fontColor(WHITE);
-		float2 v(mathMouseX, mathMouseY);
-		float2 ofst = v.normalize()*0.05f;
-		mathText("あ",mathMouseX+ofst.x, mathMouseY+ofst.y);
+		line(ox, oy, ox + radius, oy);
+		line(ox, oy, px, py);
+		arc360(ox, oy, ox + radius, oy, px, py, 30);
+		//弧
+		//strokeWeight(9);
+		stroke(GREEN);
+		arc360(ox, oy, ox + radius, oy, px, py, radius);
+		//中心点
+		strokeWeight(9);
+		stroke(YELLOW);
+		point(ox, oy);
 		
 		//テキスト
 		fontRectMode(CORNER);
-		fontColor(BLUE);
-		fontSize(30);
-		winInfo();
+		fontColor(YELLOW);
+		text(ox - 250, oy - radius - 80, "%d度", deg);
+		fontColor(GREEN);
+		text(ox, oy - radius - 80, "%fラジアン", rad);
 
 		end();
 	}
-	showCursor();
 }
