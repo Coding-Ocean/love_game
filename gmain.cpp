@@ -1,6 +1,8 @@
 ﻿#include "..\love\framework.h"
+//ラジアン値の説明用
 
-// なす角の弧（180度を超えてもAからBまで正しく描画）
+
+// 円弧（180度を超えてもAからBまで正しく描画）
 void arc360(float ox, float oy, float ax, float ay, float bx, float by, float radius)
 {
 	ax -= ox;
@@ -63,8 +65,20 @@ void gmain()
 		rect(0, 0, width, height);
 
 		//線
-		if (isTrigger(MOUSE_LBUTTON))deg += 30;
-		deg %= 360;
+		if (isPress(KEY_A))
+		{
+			if (isTrigger(MOUSE_LBUTTON))deg += 1;
+			if (deg >= 360)deg = 360;
+			if (isTrigger(MOUSE_RBUTTON))deg -= 1;
+			if (deg <= 0)deg = 0;
+		}
+		else
+		{
+			if (isTrigger(MOUSE_LBUTTON))deg += 30;
+			if (deg >= 360)deg = 360;
+			if (isTrigger(MOUSE_RBUTTON))deg -= 30;
+			if (deg <= 0)deg = 0;
+		}
 		float rad = 3.1415926f / 180 * deg;
 		float radius = 300;
 		float px = ox + cos(rad) * radius;
@@ -74,14 +88,26 @@ void gmain()
 		line(ox, oy, ox + radius, oy);
 		line(ox, oy, px, py);
 		arc360(ox, oy, ox + radius, oy, px, py, 30);
+		if (deg>0&&deg%360 == 0)
+		{
+			noFill();
+			circle(ox, oy, 30 * 2);
+		}
 		//弧
 		//strokeWeight(9);
 		stroke(GREEN);
 		arc360(ox, oy, ox + radius, oy, px, py, radius);
+		if (deg>0&&deg%360 == 0)
+		{
+			noFill();
+			circle(ox, oy, radius * 2);
+		}
+		
 		//中心点
 		strokeWeight(9);
 		stroke(YELLOW);
 		point(ox, oy);
+
 		
 		//テキスト
 		fontRectMode(CORNER);
