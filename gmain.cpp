@@ -1,9 +1,9 @@
-﻿#include "..\love\framework.h"
-//ラジアン値の説明用
+﻿//ラジアン値の説明用
 
+#include "..\love\framework.h"
 
-// 円弧（180度を超えてもAからBまで正しく描画）
-void arc360(float ox, float oy, float ax, float ay, float bx, float by, float radius)
+//ax,ayを始点とした弧を描く
+void arc360(float ox, float oy, float ax, float ay, float radian)
 {
 	ax -= ox;
 	ay -= oy;
@@ -12,34 +12,30 @@ void arc360(float ox, float oy, float ax, float ay, float bx, float by, float ra
 	ax /= al;
 	ay /= al;
 
-	bx -= ox;
-	by -= oy;
-	float bl = sqrtf(bx * bx + by * by);
-	if (bl < 1e-5f) return;
-	bx /= bl;
-	by /= bl;
-
 	// 1. acosfで基本のなす角（0〜180度）を計算
-	float rad = acosf(ax * bx + ay * by);
+	float rad = acosf(ax * 1 + ay * 0);
 
-	// 2. 外積を使って、BがAに対してどちら側にあるかを判定
-	float cross = ax * by - ay * bx;
+	// 2. 外積を使って、どちら側にあるかを判定
+	float cross = ax * 0 - ay * 1;
 
-	// 3. 外積が負（または環境により正）の場合、180度を超えた「外側の角」にする
+	// 3. 外積が負の場合、180度を超えた「外側の角」にする
 	// 元のコードの回転方向に合わせるため、crossの符号で分岐します
-	if (cross > 0) {
-		rad = 2.0f * 3.14159265f - rad;
+	if (cross < 0) 
+	{
+		rad = 2 * 3.14159265f - rad;
 	}
 
-	for (float r = 0; r < rad; r += (0.0174532f/2)) {
+	for (float r = rad; r < radian+rad; r += (0.0174532f/2)) 
+	{
 		float cr = cosf(r);
 		float sr = sinf(r);
 		float x = ax * cr - ay * sr;
 		float y = ax * sr + ay * cr;
 		// 反時計回り
-		point(ox + x * radius, oy - y * radius);
+		point(ox + cr * al, oy - sr * al);
 	}
 }
+
 void gmain()
 {
 #if 1
@@ -52,7 +48,7 @@ void gmain()
 	float oy = height / 2.0f;
 	float unit = width / 6.28f;
 
-	int deg = 0;
+	int deg = 60;
 	while (!quit())
 	{
 		begin();
@@ -75,7 +71,7 @@ void gmain()
 		else
 		{
 			if (isTrigger(MOUSE_LBUTTON))deg += 30;
-			if (deg >= 360)deg = 360;
+			//if (deg >= 360)deg = 360;
 			if (isTrigger(MOUSE_RBUTTON))deg -= 30;
 			if (deg <= 0)deg = 0;
 		}
@@ -84,37 +80,33 @@ void gmain()
 		float px = ox + cos(rad) * radius;
 		float py = oy - sin(rad) * radius;
 		strokeWeight(3);
-		stroke(YELLOW);
+		stroke(RED);
 		line(ox, oy, ox + radius, oy);
 		line(ox, oy, px, py);
-		arc360(ox, oy, ox + radius, oy, px, py, 30);
-		if (deg>0&&deg%360 == 0)
-		{
-			noFill();
-			circle(ox, oy, 30 * 2);
-		}
-		//弧
-		//strokeWeight(9);
+
+		//中心角の弧
+		stroke(YELLOW);
+		arc360(ox, oy, ox + 36, oy, rad);
+		
+		//扇形の弧
 		stroke(GREEN);
-		arc360(ox, oy, ox + radius, oy, px, py, radius);
-		if (deg>0&&deg%360 == 0)
-		{
-			noFill();
-			circle(ox, oy, radius * 2);
-		}
+		arc360(ox, oy, ox + radius, oy, rad);
 		
 		//中心点
 		strokeWeight(9);
-		stroke(YELLOW);
+		stroke(RED);
 		point(ox, oy);
-
 		
 		//テキスト
+		py = oy - radius - 120;
 		fontRectMode(CORNER);
+		fontColor(RED);
+		text(ox - 600, py, "半径１の扇形");
 		fontColor(YELLOW);
-		text(ox - 250, oy - radius - 80, "%d度", deg);
+		text(ox - 165, py, "中心角%3d度", deg);
 		fontColor(GREEN);
-		text(ox, oy - radius - 80, "%fラジアン", rad);
+		text(ox + 250, py, "%fラジアン", rad);
+
 
 		end();
 	}
