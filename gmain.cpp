@@ -38,7 +38,7 @@ void gmain()
 		stroke(255,255,255);
 		mathAxis(ox, oy, unit);
 		//sin,cosカーブ
-		ofstRad += radInc * fixed_delta;
+		ofstRad += radInc * fixedDelta;
 		strokeWeight(10);
 		for(int deg = -180; deg<=180; deg+=3){
 			float rad = 3.1415926f / 180 * deg;
@@ -70,13 +70,13 @@ void gmain()
 		fontColor(WHITE);
 		float2 v(mathMouseX, mathMouseY);
 		float2 ofst = v.normalize()*0.05f;
-		mathText("あ",mathMouseX+ofst.x, mathMouseY+ofst.y);
+		mathText("あ", mathMouseX + ofst.x, mathMouseY + ofst.y);
 		
 		//テキスト
 		fontRectMode(CORNER);
 		fontColor(BLUE);
 		fontSize(30);
-		winInfo();
+		printInfo();
 
 		end();
 	}
