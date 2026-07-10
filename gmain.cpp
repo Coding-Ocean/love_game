@@ -30,7 +30,7 @@ void gmain()
 		/*描画する------------------------------*/
 		//背景
 		noStroke();
-		fill(40,40,40);
+		fill(20,20,20);
 		rectMode(CORNER);
 		rect(0, 0, width, height);
 		//XY軸
@@ -54,9 +54,9 @@ void gmain()
 		noFill();
 		for (int deg = 0; deg < 360; deg += 30) {
 			float rad = 3.1415926f / 180 * deg;
-			float px = cos(rad + ofstRad);
-			float py = sin(rad + ofstRad);
-			mathRect(px, py, 0.1f, 0.1f,rad+ofstRad);
+			float px = cos(rad + ofstRad)*0.5f;
+			float py = sin(rad + ofstRad)*0.5f;
+			mathRect(px, py, 0.02f, 0.02f,rad+ofstRad);
 		}
 
 		//矢印
@@ -66,17 +66,16 @@ void gmain()
 		mathArc(1, 0, mathMouseX, mathMouseY, 0.2f);
 		//矢印の先にテキスト
 		fontRectMode(CENTER);
-		fontSize(20);
-		fontColor(WHITE);
+		fontSize(30);
 		float2 v(mathMouseX, mathMouseY);
 		float2 ofst = v.normalize()*0.05f;
-		mathText("あ", mathMouseX + ofst.x, mathMouseY + ofst.y);
+		mathText("a", mathMouseX + ofst.x, mathMouseY + ofst.y);
 		
 		//テキスト
 		fontRectMode(CORNER);
-		fontColor(BLUE);
 		fontSize(30);
 		printInfo();
+		print("mathMouseX:%.2f mathMouseY:%.2f", mathMouseX, mathMouseY);
 
 		end();
 	}
