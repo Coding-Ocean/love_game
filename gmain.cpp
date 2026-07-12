@@ -1,4 +1,4 @@
-﻿#include "..\love\framework.h"
+﻿#include "framework.h"
 
 void gmain()
 {
