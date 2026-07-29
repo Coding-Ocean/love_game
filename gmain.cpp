@@ -13,21 +13,28 @@ void gmain()
 	float unit = width / 6.28f;
 
 	float ofstRad = 0.0f;
-	float radInc = 1.57f / 2.0f;
+	float radInc = 3.1415926f / 180;
 
 	hideCursor();
 	while (!quit())
 	{
-		begin();
-
-		/*動かす---------------------------------*/
+		/*更新----------------------------------*/
+		//入力状態取得
+		getInputState();
+		//ESCキーでウィンドウを閉じる
+		if (isTrigger(KEY_ESC)) {
+			closeWindow();
+		}
+		//原点移動
 		if (isPress(MOUSE_LBUTTON)) {
 			ox += mouseVx;
 			oy -= mouseVy;
 		}
+		//拡大・縮小
 		unit += mouseWheel * 5;
 
 		/*描画する------------------------------*/
+		beginMsaaRender();
 		//背景
 		noStroke();
 		fill(20,20,20);
@@ -38,7 +45,7 @@ void gmain()
 		stroke(255,255,255);
 		mathAxis(ox, oy, unit);
 		//sin,cosカーブ
-		ofstRad += radInc * fixedDelta;
+		ofstRad += radInc;
 		strokeWeight(10);
 		for(int deg = -180; deg<=180; deg+=3){
 			float rad = 3.1415926f / 180 * deg;
@@ -58,10 +65,9 @@ void gmain()
 			float py = sin(rad + ofstRad)*0.5f;
 			mathRect(px, py, 0.02f, 0.02f,rad+ofstRad);
 		}
-
 		//矢印
 		strokeWeight(3);
-		stroke(GRAY);
+		stroke(BLUE);
 		mathArrow(0, 0, mathMouseX, mathMouseY, 0.05f,20.f);
 		mathArc(1, 0, mathMouseX, mathMouseY, 0.2f);
 		//矢印の先にテキスト
@@ -70,14 +76,15 @@ void gmain()
 		float2 v(mathMouseX, mathMouseY);
 		float2 ofst = v.normalize()*0.05f;
 		mathText("a", mathMouseX + ofst.x, mathMouseY + ofst.y);
-		
 		//テキスト
 		fontRectMode(CORNER);
 		fontSize(30);
 		printInfo();
 		print("mathMouseX:%.2f mathMouseY:%.2f", mathMouseX, mathMouseY);
+		print("%f", radInc);
 
-		end();
+		endMsaaRender();
+		waitFPS();
 	}
 	showCursor();
 }
