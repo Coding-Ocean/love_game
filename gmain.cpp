@@ -68,13 +68,14 @@ void gmain()
 		//矢印
 		strokeWeight(3);
 		stroke(BLUE);
-		mathArrow(0, 0, mathMouseX, mathMouseY, 0.05f,20.f);
-		mathArc(1, 0, mathMouseX, mathMouseY, 0.2f);
+		float2 v(mathMouseX, mathMouseY);
+		mathArrow(0, 0, v.x, v.y, 0.05f, 20.f);
+		float radius = min(0.2f, v.mag());
+		mathArc(1, 0, mathMouseX, mathMouseY, radius);
 		//矢印の先にテキスト
 		fontRectMode(CENTER);
 		fontSize(30);
-		float2 v(mathMouseX, mathMouseY);
-		float2 ofst = v.normalize()*0.05f;
+		float2 ofst = v.normalize() * 0.05f;
 		mathText("a", mathMouseX + ofst.x, mathMouseY + ofst.y);
 		//テキスト
 		fontRectMode(CORNER);
